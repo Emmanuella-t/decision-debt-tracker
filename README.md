@@ -44,7 +44,11 @@ Requires Python 3.11+
 
 Clone the repository:
 
+```bash
 
+git clone https://github.com/Emmanuella-t/decision-debt-tracker.git
+
+cd decision-debt-tracker
 
 
 
