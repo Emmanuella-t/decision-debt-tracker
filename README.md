@@ -1,54 +1,155 @@
-\# Decision Debt Tracker (ddt)
+# 🧠 Decision Debt Tracker
 
+> Quantify cognitive load.
+> Reduce mental drag.
+> Ship decisions faster.
 
+---
 
-Decision Debt Tracker is a lightweight Python CLI tool that helps you track decisions you are delaying and calculates a “decision debt” score that grows over time. It also produces a weekly decision health score so you can measure how much unresolved decision pressure you’re carrying.
+## 🌐 Live Demo
 
+👉 **[https://decision-debt-tracker.vercel.app](https://decision-debt-tracker.vercel.app)**
 
+A web-based cognitive load tracking system that models “decision debt” using time-weighted scoring and stress impact analysis.
 
-\## Why it matters
+---
 
+## 📖 What Is Decision Debt?
 
+Unresolved decisions quietly drain mental energy.
 
-Unresolved decisions quietly drain mental energy. The longer something stays open, the heavier it feels. This tool makes that invisible cognitive load measurable, helping you prioritize what to close first.
+The longer a decision stays open, the heavier it feels.
 
+Decision Debt Tracker makes that invisible cognitive load measurable by assigning a dynamic debt score that grows over time — allowing you to prioritize what’s mentally expensive first.
 
+---
 
-\## Features
+## ⚙️ Core Concept
 
+Each decision accumulates debt based on:
 
+* **Impact (1–5)**
+* **Stress (1–5)**
+* **Days Open**
+* **Overdue Acceleration**
+* **Compounding Time Weight**
 
-\- Add decisions with impact and stress levels
+The system produces:
 
-\- Automatic compounding decision debt score (0–100)
+* 📈 A live debt score per decision
+* 🧮 Total and average debt metrics
+* 💡 A weekly decision health score (0–100)
 
-\- Overdue acceleration logic
+---
 
-\- Weekly decision health score
+## 🖥️ Two Interfaces
 
-\- SQLite persistence
+### 1️⃣ Python CLI (Local-first)
 
-\- Markdown report export
+```bash
+ddt add --title "Choose internship housing" --impact 4 --stress 3
+ddt list
+ddt resolve --id 3
+```
 
-\- Unit tested scoring and database logic
+Features:
 
+* SQLite persistence
+* Markdown export reports
+* Unit tested scoring logic
+* Offline-first design
 
+---
 
-\## Installation
+### 2️⃣ Next.js Web App (Deployed)
 
+Built with:
 
+* Next.js 16
+* TypeScript
+* Tailwind CSS
+* Framer Motion
+* Lucide Icons
+* LocalStorage persistence
+
+The dashboard automatically:
+
+* Sorts decisions by highest debt
+* Calculates total & average debt
+* Updates health score dynamically
+* Animates state transitions
+
+---
+
+## 🧠 Why This Project Exists
+
+Decision fatigue is real.
+
+We track calories.
+We track sleep.
+We track steps.
+
+But we don’t track unresolved decisions — even though they directly impact clarity and productivity.
+
+This project explores how cognitive load can be modeled and visualized in a measurable way.
+
+---
+
+## 🏗️ Architecture Overview
+
+```
+decision-debt-tracker/
+│
+├── ddt/                # Python CLI package
+├── reports/            # Markdown export outputs
+├── tests/              # Unit tests
+├── web/                # Next.js frontend
+│   ├── app/
+│   ├── lib/
+│   └── components/
+```
+
+---
+
+## 🚀 Installation (CLI)
 
 Requires Python 3.11+
 
-
-
-Clone the repository:
-
 ```bash
-
 git clone https://github.com/Emmanuella-t/decision-debt-tracker.git
-
 cd decision-debt-tracker
+pip install -e .
+```
 
+---
+
+## 🔮 Future Extensions
+
+* Supabase backend
+* AI-based decision suggestion engine
+* Historical debt trend charts
+* Productivity analytics export
+* Mobile-friendly PWA version
+
+---
+
+## 👩🏽‍💻 Author
+
+Built by **Emmanuella Turkson**
+
+Computer Science • AI • UX • Systems Thinking
+
+---
+
+# Why This Version Is Stronger
+
+It:
+
+* Positions it as a concept, not a toy
+* Shows architecture
+* Shows stack
+* Shows thinking
+* Signals depth
+* Feels product-minded
 
 
