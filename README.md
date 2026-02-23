@@ -141,15 +141,4 @@ Computer Science • AI • UX • Systems Thinking
 
 ---
 
-# Why This Version Is Stronger
-
-It:
-
-* Positions it as a concept, not a toy
-* Shows architecture
-* Shows stack
-* Shows thinking
-* Signals depth
-* Feels product-minded
-
 
