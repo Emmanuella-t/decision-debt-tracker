@@ -1,64 +1,74 @@
+import { diffISODays, localTodayISO } from "./dates";
+
 export type DebtBreakdown = {
-  debt: number; // 0-100
+  debt: number;
   daysOpen: number;
   overdueDays: number;
+  invalid: boolean;
 };
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function daysBetween(a: Date, b: Date) {
-  const ms = b.getTime() - a.getTime();
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
-}
-
-// A smooth compounding-ish curve that doesn’t explode:
-// baseAge = 1 - exp(-daysOpen / 21)  (fast early growth then flattens)
+/**
+ * Web debt score, 0–100. This is the formula already used by the web app.
+ * Do not retune it here.
+ *
+ * The Python CLI uses a different formula (severity × growth × overdue boost,
+ * health divisor 200). See the Settings page for the difference. A later
+ * milestone should make the CLI formula authoritative and show the score
+ * change before migrating saved records.
+ *
+ * Day counts use calendar dates so a daylight-saving transition cannot drop
+ * a day. The curve itself is unchanged.
+ */
 function ageFactor(daysOpen: number) {
   return 1 - Math.exp(-daysOpen / 21);
 }
 
-// Overdue adds extra pressure but still bounded
 function overdueBoost(overdueDays: number) {
   if (overdueDays <= 0) return 0;
   return 1 - Math.exp(-overdueDays / 14);
 }
 
 export function computeDebt(params: {
-  createdDate: string; // YYYY-MM-DD
-  dueDate?: string | null; // YYYY-MM-DD
-  impact: number; // 1-5
-  stress: number; // 1-5
+  createdDate: string;
+  dueDate?: string | null;
+  impact: number;
+  stress: number;
   today?: Date;
 }): DebtBreakdown {
-  const today = params.today ?? new Date();
+  const todayISO = localTodayISO(params.today ?? new Date());
+  const openSpan = diffISODays(params.createdDate, todayISO);
+  const ratingsInvalid =
+    !Number.isInteger(params.impact) ||
+    !Number.isInteger(params.stress) ||
+    params.impact < 1 ||
+    params.impact > 5 ||
+    params.stress < 1 ||
+    params.stress > 5;
 
-  const created = new Date(params.createdDate + "T00:00:00");
-  const daysOpen = Math.max(0, daysBetween(created, today));
+  if (openSpan === null || ratingsInvalid) {
+    return { debt: 0, daysOpen: 0, overdueDays: 0, invalid: true };
+  }
 
-  const due = params.dueDate ? new Date(params.dueDate + "T00:00:00") : null;
-  const overdueDays = due ? Math.max(0, daysBetween(due, today)) : 0;
+  const daysOpen = Math.max(0, openSpan);
+  const dueSpan = params.dueDate ? diffISODays(params.dueDate, todayISO) : 0;
+  const overdueDays = dueSpan === null ? 0 : Math.max(0, dueSpan);
 
-  // Multipliers: impact & stress influence but don’t dominate
-  const impactMult = 0.75 + params.impact * 0.10; // 0.85..1.25
-  const stressMult = 0.75 + params.stress * 0.10; // 0.85..1.25
-
-  const base = ageFactor(daysOpen); // 0..~1
-  const overdue = overdueBoost(overdueDays); // 0..~1
-
-  // Combine: base is the core; overdue accelerates if late
-  // Weighted sum then scaled to 0..100
+  const impactMult = 0.75 + params.impact * 0.1;
+  const stressMult = 0.75 + params.stress * 0.1;
+  const base = ageFactor(daysOpen);
+  const overdue = overdueBoost(overdueDays);
   const raw = (0.78 * base + 0.22 * overdue) * impactMult * stressMult;
-
   const debt = clamp(Math.round(raw * 100), 0, 100);
 
-  return { debt, daysOpen, overdueDays };
+  return { debt, daysOpen, overdueDays, invalid: dueSpan === null && Boolean(params.dueDate) };
 }
 
 export function computeHealthScore(totalDebt: number) {
-  // Total debt can exceed 100, health should remain 0..100
-  // Simple interpretation: 0 debt => 100 health, 400 debt => near 0
+  if (!Number.isFinite(totalDebt) || totalDebt < 0) return 100;
   const score = Math.round(100 * Math.exp(-totalDebt / 160));
   return clamp(score, 0, 100);
 }

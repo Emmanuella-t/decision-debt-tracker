@@ -21,6 +21,7 @@ class TestDB(unittest.TestCase):
                 stress=2,
                 created_date=date(2026, 2, 1),
                 due_date=None,
+                today=date(2026, 2, 13),
             )
 
             self.assertIsInstance(new_id, int)
@@ -45,12 +46,13 @@ class TestDB(unittest.TestCase):
                 stress=2,
                 created_date=date(2026, 2, 1),
                 due_date=None,
+                today=date(2026, 2, 13),
             )
 
-            ok = resolve_decision(conn, decision_id=new_id, resolved_date=date(2026, 2, 13))
+            ok = resolve_decision(conn, decision_id=new_id, resolved_date=date(2026, 2, 13), today=date(2026, 2, 13))
             self.assertTrue(ok)
 
-            ok2 = resolve_decision(conn, decision_id=new_id, resolved_date=date(2026, 2, 13))
+            ok2 = resolve_decision(conn, decision_id=new_id, resolved_date=date(2026, 2, 13), today=date(2026, 2, 13))
             self.assertFalse(ok2)
 
             conn.close()
