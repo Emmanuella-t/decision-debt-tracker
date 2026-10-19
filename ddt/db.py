@@ -7,6 +7,7 @@ from typing import Optional
 
 from .models import Decision
 from .utils import format_date, parse_date
+from .validation import validate_new_decision, validate_resolution
 
 
 SCHEMA_SQL = """
@@ -46,15 +47,26 @@ def add_decision(
     stress: int,
     created_date: date,
     due_date: Optional[date],
+    today: Optional[date] = None,
 ) -> int:
+    effective_today = today or date.today()
+    cleaned_title, cleaned_category = validate_new_decision(
+        title=title,
+        category=category,
+        impact=impact,
+        stress=stress,
+        created_date=created_date,
+        due_date=due_date,
+        today=effective_today,
+    )
     cur = conn.execute(
         """
         INSERT INTO decisions (title, category, impact, stress, created_date, due_date, resolved_date)
         VALUES (?, ?, ?, ?, ?, ?, NULL)
         """,
         (
-            title.strip(),
-            category.strip(),
+            cleaned_title,
+            cleaned_category,
             impact,
             stress,
             format_date(created_date),
@@ -70,7 +82,21 @@ def resolve_decision(
     *,
     decision_id: int,
     resolved_date: date,
+    today: Optional[date] = None,
 ) -> bool:
+    effective_today = today or date.today()
+    row = conn.execute(
+        "SELECT created_date, resolved_date FROM decisions WHERE id = ?",
+        (decision_id,),
+    ).fetchone()
+    if row is None or row["resolved_date"] is not None:
+        return False
+
+    validate_resolution(
+        created_date=parse_date(str(row["created_date"])),
+        resolved_date=resolved_date,
+        today=effective_today,
+    )
     cur = conn.execute(
         """
         UPDATE decisions

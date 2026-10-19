@@ -134,6 +134,7 @@ def main() -> int:
                 stress=stress,
                 created_date=created_date,
                 due_date=due_date,
+                today=today,
             )
 
             print(f"Added decision #{new_id}: {args.title}")
@@ -149,6 +150,7 @@ def main() -> int:
                 conn,
                 decision_id=args.id,
                 resolved_date=resolved_date,
+                today=today,
             )
 
             if not ok:
